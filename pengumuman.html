@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengumuman - Perpustakaan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="d-flex">
+        <div class="sidebar d-flex flex-column flex-shrink-0 p-3">
+             <a href="koleksi-buku.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+                <img src="assets/logo.png" class="bi me-2" height="32">
+                <span class="fs-4">Perpustakaan</span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li><a href="koleksi-buku.html" class="nav-link link-dark">Koleksi Buku</a></li>
+                <li><a href="peminjaman.html" class="nav-link link-dark">Peminjaman</a></li>
+                <li><a href="pengumuman.html" class="nav-link active" aria-current="page">Pengumuman</a></li>
+                <li><a href="anggota.html" class="nav-link link-dark">Anggota</a></li>
+                <li><a href="laporan.html" class="nav-link link-dark" aria-current="page">Laporan</a></li>
+            </ul>
+            <hr>
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Admin" width="32" height="32" class="rounded-circle me-2">
+                    <strong>Admin Perpustakaan</strong>
+                </a>
+                <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
+                    <li><a class="dropdown-item" href="profile.html">Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="login.html">Sign out</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content"> 
+            <img src="assets/logo-trans.png" class="background-logo" alt="Background Logo">
+
+            <div id="list-view">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Daftar Pengumuman</h2>
+                    <button class="btn btn-primary" onclick="showFormView()">+ Tambah Pengumuman</button>
+                </div>
+                <div class="card">
+                    <div class="card-header">Pengumuman Terbaru</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Judul</th>
+                                        <th>Konten</th>
+                                        <th>Tanggal</th>
+                                        <th class="text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="announcement-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="form-view" class="hidden">
+                <h2 class="mb-4" id="form-title">Tambah Pengumuman Baru</h2>
+                <div class="form-container">
+                    <form id="form-pengumuman">
+                        <input type="hidden" id="announcement-id">
+                        <div class="row g-4">
+                            <div class="col-12"><label for="judulPengumuman" class="form-label">Judul</label><input type="text" class="form-control" id="judulPengumuman" required></div>
+                            <div class="col-12"><label for="kontenPengumuman" class="form-label">Konten</label><textarea class="form-control" id="kontenPengumuman" rows="6" required></textarea></div>
+                            <div class="col-md-6"><label for="tanggalPublikasi" class="form-label">Tanggal</label><input type="date" class="form-control" id="tanggalPublikasi" required></div>
+                        </div>
+                        <div class="col-12 mt-4 d-flex justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" onclick="showListView()">Kembali</button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="detailAnnouncementModal" tabindex="-1" aria-labelledby="detailAnnouncementModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailAnnouncementModalLabel">Detail Pengumuman</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="detailAnnouncementModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var announcements = [
+                { id: 1, judul: "Perpanjangan Waktu Peminjaman", konten: "Perpustakaan akan melakukan perpanjangan waktu peminjaman buku khusus untuk koleksi terbaru. Anggota dapat memperpanjang masa pinjam hingga akhir bulan Mei 2025. Harap segera periksa kembali tanggal jatuh tempo peminjaman Anda. Peraturan ini dibuat untuk memberikan kemudahan bagi para anggota dalam menikmati koleksi buku yang beragam.", tanggal: "2025-05-25"},
+                { id: 2, judul: "Libur Hari Raya Idul Adha", konten: "Diberitahukan kepada seluruh anggota perpustakaan bahwa perpustakaan akan ditutup sementara dalam rangka Hari Raya Idul Adha pada tanggal 16 dan 17 Juni 2025. Kegiatan operasional akan kembali normal pada tanggal 18 Juni 2025. Mohon maaf atas ketidaknyamananannya.", tanggal: "2025-06-01"},
+                { id: 3, judul: "Pengumuman Jadwal Ujian Tengah Semester", konten: "Jadwal ujian tengah semester untuk semua program studi telah diterbitkan. Mohon segera periksa papan pengumuman atau website resmi universitas untuk informasi lengkap mengenai tanggal, waktu, dan lokasi ujian Anda. Persiapkan diri Anda dengan baik.", tanggal: "2025-07-10"}
+            ];
+
+            var listView = document.getElementById('list-view');
+            var formView = document.getElementById('form-view');
+            var form = document.getElementById('form-pengumuman');
+            var tableBody = document.getElementById('announcement-list-body');
+            var detailAnnouncementModal = new bootstrap.Modal(document.getElementById('detailAnnouncementModal'));
+            var detailAnnouncementModalBody = document.getElementById('detailAnnouncementModalBody');
+
+            function renderTable() {
+                tableBody.innerHTML = '';
+                if(announcements.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Belum ada pengumuman.</td></tr>';
+                    return;
+                }
+                announcements.forEach(function(item, index) {
+                    var row = `<tr>
+                        <td>${index + 1}</td>
+                        <td class="fw-bold">${item.judul}</td>
+                        <td><p class="mb-0 text-truncate" style="max-width: 300px;">${item.konten}</p></td>
+                        <td>${item.tanggal}</td>
+                        <td class="kolom-aksi">
+                            <button class="btn btn-info btn-sm" onclick="handleDetail(${item.id})">Detail</button>
+                            <button class="btn btn-warning btn-sm" onclick="handleEdit(${item.id})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="handleDelete(${item.id})">Hapus</button>
+                        </td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
+
+            window.showListView = function() {
+                form.reset();
+                document.getElementById('announcement-id').value = '';
+                document.getElementById('form-title').textContent = 'Tambah Pengumuman Baru';
+                listView.classList.remove('hidden');
+                formView.classList.add('hidden');
+                renderTable();
+            }
+
+            window.showFormView = function() {
+                listView.classList.add('hidden');
+                formView.classList.remove('hidden');
+            }
+
+            window.handleDetail = function(id) {
+                var item = announcements.find(function(a) { return a.id === id; });
+                if (item) {
+                    detailAnnouncementModalBody.innerHTML = `
+                        <h5>${item.judul}</h5>
+                        <p class="text-muted">Tanggal Publikasi: ${item.tanggal}</p>
+                        <hr>
+                        <p>${item.konten}</p>
+                    `;
+                    detailAnnouncementModal.show();
+                }
+            }
+
+            window.handleEdit = function(id) {
+                var itemToEdit = announcements.find(function(a) { return a.id === id; });
+                if (itemToEdit) {
+                    document.getElementById('form-title').textContent = 'Edit Pengumuman';
+                    document.getElementById('announcement-id').value = itemToEdit.id;
+                    document.getElementById('judulPengumuman').value = itemToEdit.judul;
+                    document.getElementById('kontenPengumuman').value = itemToEdit.konten;
+                    document.getElementById('tanggalPublikasi').value = itemToEdit.tanggal;
+                    showFormView();
+                }
+            }
+            
+            window.handleDelete = function(id) {
+                if (confirm('Yakin ingin menghapus pengumuman ini?')) {
+                    announcements = announcements.filter(function(a) { return a.id !== id; });
+                    renderTable();
+                }
+            }
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                var id = document.getElementById('announcement-id').value;
+                var data = {
+                    id: id ? parseInt(id) : announcements.length > 0 ? Math.max(...announcements.map(a => a.id)) + 1 : 1,
+                    judul: document.getElementById('judulPengumuman').value,
+                    konten: document.getElementById('kontenPengumuman').value,
+                    tanggal: document.getElementById('tanggalPublikasi').value
+                };
+
+                if (id) {
+                    var index = announcements.findIndex(function(a) { return a.id == id; });
+                    if(index !== -1) announcements[index] = data;
+                } else {
+                    announcements.push(data);
+                }
+                showListView();
+            });
+
+            showListView();
+        });
+    </script>
+</body>
+</html>

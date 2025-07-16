@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Koleksi Buku - Perpustakaan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="d-flex">
+        <div class="sidebar d-flex flex-column flex-shrink-0 p-3">
+            <a href="koleksi-buku.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+                <img src="assets/logo.png" class="bi me-2" height="32" alt="UDB Logo">
+                <span class="fs-4">Perpustakaan</span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item"><a href="koleksi-buku.html" class="nav-link active" aria-current="page">Koleksi Buku</a></li>
+                <li><a href="peminjaman.html" class="nav-link link-dark">Peminjaman</a></li>
+                <li><a href="pengumuman.html" class="nav-link link-dark">Pengumuman</a></li>
+                <li><a href="anggota.html" class="nav-link link-dark">Anggota</a></li>
+                <li><a href="laporan.html" class="nav-link link-dark" aria-current="page">Laporan</a></li>
+            </ul>
+            <hr>
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Admin" width="32" height="32" class="rounded-circle me-2">
+                    <strong>Admin Perpustakaan</strong>
+                </a>
+                <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
+                    <li><a class="dropdown-item" href="profile.html">Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="login.html">Sign out</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content"> 
+            <img src="assets/logo-trans.png" class="background-logo" alt="Background Logo">
+
+            <div id="list-view">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Daftar Koleksi Buku</h2>
+                    <button class="btn btn-primary" onclick="showFormView()">+ Tambah Koleksi</button>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                         <div class="input-group">
+                            <input type="text" class="form-control" id="search-id-input" placeholder="Cari buku berdasarkan ID..." onkeyup="handleSearch()">
+                            <button class="btn btn-outline-secondary" type="button" onclick="handleSearch()">Cari</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Daftar Buku Tersedia</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th><th>Cover</th><th>Judul</th><th>Penulis</th><th>Stok</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="book-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="form-view" class="hidden">
+                <h2 class="mb-4" id="form-title">Tambah Koleksi Buku</h2>
+                <div class="form-container">
+                    <form id="form-koleksi">
+                        <input type="hidden" id="book-id">
+                        <input type="hidden" id="existing-cover">
+                        <div class="row g-3">
+                            <div class="col-md-6"><label for="judul" class="form-label">Judul Buku</label><input type="text" class="form-control" id="judul" required></div>
+                            <div class="col-md-6"><label for="isbn" class="form-label">ISBN</label><input type="text" class="form-control" id="isbn" required></div> 
+                            
+                            <div class="col-md-12">
+                                <label class="form-label">Penulis</label>
+                                <div id="author-inputs-container">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control author-input" required>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addAuthorInput()">+ Tambah Penulis</button>
+                            </div>
+
+                            <div class="col-md-6"><label for="penerbit" class="form-label">Penerbit</label><input type="text" class="form-control" id="penerbit" required></div>
+                            <div class="col-md-6"><label for="tahun" class="form-label">Tahun Terbit</label><input type="number" class="form-control" id="tahun" required></div>
+                            <div class="col-md-6"><label for="stok" class="form-label">Stok</label><input type="number" class="form-control" id="stok" required></div>
+
+                            <div class="col-md-6">
+                                <label for="kategori" class="form-label">Kategori</label>
+                                <select class="form-select" id="kategori" required>
+                                    <option value="tambah_kategori_baru">-- Tambah Kategori Baru --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 hidden" id="new-category-wrapper">
+                                <label for="kategori-baru" class="form-label">Nama Kategori Baru</label>
+                                <input type="text" class="form-control" id="kategori-baru">
+                            </div>
+
+                            <div class="col-md-12"><label for="cover" class="form-label">Upload Cover Buku</label><input type="file" class="form-control" id="cover" accept="image/*"></div>
+                            
+                            <div class="col-md-12"><label for="deskripsi" class="form-label">Deskripsi Buku</label><textarea class="form-control" id="deskripsi" rows="4" required></textarea></div>
+                        </div>
+                        <div class="mt-4 d-flex justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" onclick="showListView()">Kembali</button>
+                            <button type="submit" id="submit-button" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailModalLabel">Detail Buku</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="detailModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let books = [
+            { id: 1, cover: "https://cdn.gramedia.com/uploads/items/591701404_sapiens.jpg", judul: "Sapiens", penulis: ["Yuval Noah Harari"], penerbit: "Gramedia", tahun: 2013, kategori: "Sejarah", stok: 8, deskripsi: "Sebuah buku yang mengisahkan sejarah umat manusia dari zaman batu hingga era modern.", isbn: "978-602-033088-2" },
+            { id: 2, cover: "https://image.gramedia.net/rs:fit:0:0/plain/https://cdn.gramedia.com/uploads/items/9786020633176_.Atomic_Habit.jpg", judul: "Atomic Habits", penulis: ["James Clear"], penerbit: "Penguin", tahun: 2018, kategori: "Pengembangan Diri", stok: 6, deskripsi: "Cara mudah untuk membangun kebiasaan baik dan menghilangkan kebiasaan buruk.", isbn: "978-0-7352-1129-2" },
+            { id: 3, cover: "https://ebooks.gramedia.com/ebook-covers/45496/image_highres/ID_FITE2018MTH12.jpg", judul: "Filosofi Teras", penulis: ["Henry Manampiring"], penerbit: "Kompas", tahun: 2018, kategori: "Filsafat", stok: 10, deskripsi: "Pengantar filsafat Stoa yang relevan untuk kehidupan masa kini.", isbn: "978-602-412518-9" }
+        ];
+
+        let categories = ["Sejarah", "Pengembangan Diri", "Filsafat", "Sains", "Novel"];
+        const listView = document.getElementById('list-view');
+        const formView = document.getElementById('form-view');
+        const form = document.getElementById('form-koleksi');
+        const formTitle = document.getElementById('form-title');
+        const tableBody = document.getElementById('book-list-body');
+        const bookIdInput = document.getElementById('book-id');
+        const categorySelect = document.getElementById('kategori');
+        const newCategoryWrapper = document.getElementById('new-category-wrapper');
+        const newCategoryInput = document.getElementById('kategori-baru');
+        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+        const detailModalBody = document.getElementById('detailModalBody');
+        const isbnInput = document.getElementById('isbn');
+        
+        let currentlyOpenDetailRow = null;
+
+        window.showListView = function() {
+            form.reset();
+            bookIdInput.value = '';
+            document.getElementById('existing-cover').value = '';
+            formTitle.textContent = 'Tambah Koleksi Buku';
+            resetAuthorInputs();
+            
+            listView.classList.remove('hidden');
+            formView.classList.add('hidden');
+            renderTable();
+            if (currentlyOpenDetailRow) {
+                currentlyOpenDetailRow.remove();
+                currentlyOpenDetailRow = null;
+            }
+        }
+
+        window.showFormView = function() {
+            populateCategories();
+            listView.classList.add('hidden');
+            formView.classList.remove('hidden');
+        }
+
+        function renderTable(bookList = books) {
+            tableBody.innerHTML = '';
+            if (bookList.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center">Buku tidak ditemukan atau belum ada.</td></tr>`;
+                return;
+            }
+            bookList.forEach(book => {
+                const row = document.createElement('tr');
+                row.classList.add('clickable-row');
+                row.dataset.bookId = book.id;
+                row.innerHTML = `
+                    <td class="fw-bold">${book.id}</td>
+                    <td><img src="${book.cover || 'https://via.placeholder.com/60x90'}" alt="Cover" class="book-cover" /></td>
+                    <td class="fw-bold">${book.judul}</td>
+                    <td>${book.penulis.join(', ')}</td>
+                    <td>${book.stok}</td>
+                `;
+
+                const detailRow = document.createElement('tr');
+                detailRow.classList.add('detail-row', 'hidden');
+                detailRow.innerHTML = `
+                    <td colspan="5">
+                        <div class="detail-content">
+                            <button class="btn btn-info btn-sm" onclick="handleDetail(${book.id})">Detail</button>
+                            <button class="btn btn-warning btn-sm" onclick="handleEdit(${book.id})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="handleDelete(${book.id})">Hapus</button>
+                        </div>
+                    </td>
+                `;
+                
+                row.addEventListener('click', function() {
+                    if (currentlyOpenDetailRow && currentlyOpenDetailRow !== detailRow) {
+                        currentlyOpenDetailRow.classList.add('hidden');
+                        currentlyOpenDetailRow.previousElementSibling.classList.remove('table-active');
+                    }
+
+                    detailRow.classList.toggle('hidden');
+                    row.classList.toggle('table-active');
+
+                    if (!detailRow.classList.contains('hidden')) {
+                        currentlyOpenDetailRow = detailRow;
+                    } else {
+                        currentlyOpenDetailRow = null;
+                    }
+                });
+
+                tableBody.appendChild(row);
+                tableBody.appendChild(detailRow);
+            });
+        }
+        
+        window.handleDetail = function(id) {
+            const book = books.find(b => b.id === id);
+            if (!book) return;
+            
+            detailModalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <img src="${book.cover}" class="img-fluid rounded mb-3" alt="Cover">
+                    </div>
+                    <div class="col-md-8">
+                        <h3>${book.judul}</h3>
+                        <p class="text-muted">oleh ${book.penulis.join(', ')}</p>
+                        <hr>
+                        <p><strong>Deskripsi:</strong><br>${book.deskripsi}</p>
+                        <hr>
+                        <p><strong>Penerbit:</strong> ${book.penerbit}</p>
+                        <p><strong>Tahun Terbit:</strong> ${book.tahun}</p>
+                        <p><strong>Kategori:</strong> ${book.kategori}</p>
+                        <p><strong>Stok Tersedia:</strong> ${book.stok}</p>
+                        <p><strong>ID Buku:</strong> ${book.id}</p>
+                        <p><strong>ISBN:</strong> ${book.isbn || 'N/A'}</p>
+                    </div>
+                </div>
+            `;
+            detailModal.show();
+        }
+        
+        window.handleEdit = function(id) {
+            if (currentlyOpenDetailRow) {
+                currentlyOpenDetailRow.remove();
+                currentlyOpenDetailRow = null;
+            }
+
+            const bookToEdit = books.find(book => book.id === id);
+            if (bookToEdit) {
+                formTitle.textContent = 'Edit Koleksi Buku';
+                bookIdInput.value = bookToEdit.id;
+                document.getElementById('judul').value = bookToEdit.judul;
+                isbnInput.value = bookToEdit.isbn || '';
+
+                resetAuthorInputs();
+                const authorContainer = document.getElementById('author-inputs-container');
+                bookToEdit.penulis.forEach((author, index) => {
+                    if (index === 0) {
+                        authorContainer.querySelector('.author-input').value = author;
+                    } else {
+                        addAuthorInput(author);
+                    }
+                });
+
+                document.getElementById('penerbit').value = bookToEdit.penerbit;
+                document.getElementById('tahun').value = bookToEdit.tahun;
+                document.getElementById('stok').value = bookToEdit.stok;
+                document.getElementById('deskripsi').value = bookToEdit.deskripsi;
+                document.getElementById('existing-cover').value = bookToEdit.cover; 
+
+                populateCategories();
+                categorySelect.value = bookToEdit.kategori;
+
+                showFormView();
+            }
+        }
+
+        window.handleDelete = function(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus buku ini?')) {
+                books = books.filter(book => book.id !== id);
+                renderTable();
+                currentlyOpenDetailRow = null; 
+            }
+        }
+        
+        window.handleSearch = function() {
+            const query = document.getElementById('search-id-input').value;
+            if (!query) {
+                renderTable(books);
+                return;
+            }
+            const foundBooks = books.filter(book => book.id == query || book.judul.toLowerCase().includes(query.toLowerCase()));
+            renderTable(foundBooks);
+            if (currentlyOpenDetailRow) {
+                currentlyOpenDetailRow.remove();
+                currentlyOpenDetailRow = null;
+            }
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const id = bookIdInput.value;
+            const coverFile = document.getElementById('cover').files[0];
+            
+            const processData = (coverUrl) => {
+                let selectedCategory = categorySelect.value;
+                if (selectedCategory === 'tambah_kategori_baru') {
+                    const newCat = newCategoryInput.value.trim();
+                    if (newCat) {
+                        if (!categories.includes(newCat)) {
+                            categories.push(newCat);
+                        }
+                        selectedCategory = newCat;
+                    } else {
+                        alert("Nama kategori baru tidak boleh kosong!");
+                        return;
+                    }
+                }
+
+                const authorInputs = document.querySelectorAll('.author-input');
+                const authorValues = Array.from(authorInputs).map(input => input.value.trim()).filter(val => val);
+
+                let newId;
+                if (id) {
+                    newId = parseInt(id); 
+                } else {
+                    const maxId = books.length > 0 ? Math.max(...books.map(book => book.id)) : 0;
+                    newId = maxId + 1;
+                }
+
+                const bookData = {
+                    id: newId, 
+                    judul: document.getElementById('judul').value,
+                    isbn: isbnInput.value,
+                    penulis: authorValues,
+                    penerbit: document.getElementById('penerbit').value,
+                    tahun: parseInt(document.getElementById('tahun').value),
+                    kategori: selectedCategory,
+                    stok: parseInt(document.getElementById('stok').value),
+                    deskripsi: document.getElementById('deskripsi').value,
+                    cover: coverUrl,
+                };
+
+                if (id) { 
+                    const bookIndex = books.findIndex(b => b.id == id);
+                    if(bookIndex !== -1) books[bookIndex] = bookData;
+                } else { 
+                    books.push(bookData);
+                }
+                
+                showListView();
+            };
+
+            if (coverFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    processData(e.target.result);
+                };
+                reader.readAsDataURL(coverFile);
+            } else {
+                const existingCover = document.getElementById('existing-cover').value;
+                processData(existingCover || 'https://via.placeholder.com/60x90');
+            }
+        });
+
+        function populateCategories() {
+            const currentVal = categorySelect.value;
+            categorySelect.innerHTML = '';
+            categories.forEach(cat => {
+                const option = new Option(cat, cat);
+                categorySelect.add(option);
+            });
+            const addNewOption = new Option('-- Tambah Kategori Baru --', 'tambah_kategori_baru');
+            categorySelect.add(addNewOption, 0);
+            categorySelect.value = currentVal || 'tambah_kategori_baru';
+            
+            newCategoryWrapper.classList.toggle('hidden', categorySelect.value !== 'tambah_kategori_baru');
+        }
+        
+        categorySelect.addEventListener('change', function() {
+            newCategoryWrapper.classList.toggle('hidden', this.value !== 'tambah_kategori_baru');
+            if (this.value !== 'tambah_kategori_baru') {
+                newCategoryInput.value = '';
+            }
+        });
+        
+        window.addAuthorInput = function(value = '') {
+            const container = document.getElementById('author-inputs-container');
+            const newAuthorGroup = document.createElement('div');
+            newAuthorGroup.className = 'input-group';
+            newAuthorGroup.innerHTML = `
+                <input type="text" class="form-control author-input" required>
+                <button class="btn btn-outline-danger" type="button" onclick="this.parentElement.remove()">Hapus</button>
+            `;
+            container.appendChild(newAuthorGroup);
+        }
+
+        function resetAuthorInputs() {
+            const container = document.getElementById('author-inputs-container');
+            container.innerHTML = `
+                <div class="input-group">
+                    <input type="text" class="form-control author-input" required>
+                </div>
+            `;
+        }
+
+        showListView();
+    });
+    </script>
+</body>
+</html>

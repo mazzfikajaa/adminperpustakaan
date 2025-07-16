@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Peminjaman Buku - Perpustakaan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="d-flex">
+        <div class="sidebar d-flex flex-column flex-shrink-0 p-3">
+             <a href="koleksi-buku.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+                <img src="assets/logo.png" class="bi me-2" height="32" alt="UDB Logo">
+                <span class="fs-4">Perpustakaan</span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li><a href="koleksi-buku.html" class="nav-link link-dark">Koleksi Buku</a></li>
+                <li><a href="peminjaman.html" class="nav-link active" aria-current="page">Peminjaman</a></li>
+                <li><a href="pengumuman.html" class="nav-link link-dark">Pengumuman</a></li>
+                <li><a href="anggota.html" class="nav-link link-dark" >Anggota</a></li>
+                <li><a href="laporan.html" class="nav-link link-dark" aria-current="page">Laporan</a></li>
+            </ul>
+            <hr>
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Admin" width="32" height="32" class="rounded-circle me-2">
+                    <strong>Admin Perpustakaan</strong>
+                </a>
+                <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
+                    <li><a class="dropdown-item" href="profile.html">Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="login.html">Sign out</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content"> 
+            <img src="assets/logo-trans.png" class="background-logo" alt="Background Logo">
+
+            <div id="list-view">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Daftar Peminjaman Buku</h2>
+                    <div>
+                        <button class="btn btn-secondary" onclick="showHistory()">Histori Umum</button>
+                        <button class="btn btn-primary" onclick="showFormView()">+ Tambah Peminjaman</button>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3"><div class="card stat-card h-100"><div class="card-body"><div class="stat-number" id="total-peminjaman">0</div><div class="stat-label">Total Peminjaman</div></div></div></div>
+                    <div class="col-md-3 mb-3"><div class="card stat-card success h-100"><div class="card-body"><div class="stat-number" id="total-dikembalikan">0</div><div class="stat-label">Dikembalikan</div></div></div></div>
+                    <div class="col-md-3 mb-3"><div class="card stat-card warning h-100"><div class="card-body"><div class="stat-number" id="total-dipinjam">0</div><div class="stat-label">Dipinjam</div></div></div></div>
+                    <div class="col-md-3 mb-3"><div class="card stat-card danger h-100"><div class="card-body"><div class="stat-number" id="total-terlambat">0</div><div class="stat-label">Terlambat</div></div></div></div>
+                </div>
+
+                <div class="card filter-section mb-4">
+                     <div class="input-group">
+                        <input type="text" class="form-control" id="search-nim-input" placeholder="Cari peminjaman berdasarkan NIM..." onkeyup="handleSearchByNim()">
+                        <button class="btn btn-outline-primary" type="button" onclick="handleSearchByNim()">Cari</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Daftar Peminjaman Aktif</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr><th>No</th><th>NIM Peminjam</th><th>Buku</th><th>Tanggal Pinjam</th><th>Status</th><th>Denda</th><th>Aksi</th></tr>
+                                </thead>
+                                <tbody id="peminjaman-list-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="form-view" class="hidden">
+                <h2 class="mb-4" id="form-title">Tambah Peminjaman Baru</h2>
+                <div class="form-container">
+                    <form id="form-peminjaman" novalidate>
+                        <div class="row g-3">
+                            <div class="col-md-12 position-relative">
+                                <label for="memberNim" class="form-label">NIM Peminjam</label>
+                                <input type="text" class="form-control" id="memberNim" required autocomplete="off">
+                                <div id="nim-suggestions" class="list-group position-absolute w-100"></div>
+                                <small id="selectedMemberName" class="form-text text-success fw-bold"></small>
+                            </div>
+                            <div class="col-md-12"><label for="bookId" class="form-label">Pilih Buku</label><select id="bookId" class="form-select" required></select></div>
+                            <div class="col-md-6"><label for="tglPinjam" class="form-label">Tanggal Pinjam</label><input type="date" class="form-control" id="tglPinjam" readonly></div>
+                            <div class="col-md-6"><label for="tglKembali" class="form-label">Tanggal Kembali</label><input type="date" class="form-control" id="tglKembali" readonly></div>
+                        </div>
+                        <div class="mt-4 d-flex justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" onclick="showListView()">Kembali</button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historyModalLabel">Histori Peminjaman</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="historyModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const DENDA_PER_HARI = 1000;
+        let members = [
+            { nim: "20202021", name: "Ahmad Sutisna" },
+            { nim: "20202022", name: "Budi Santoso" },
+            { nim: "20202023", name: "Citra Dewi" },
+            { nim: "20211011", name: "Doni Firmansyah" },
+            { nim: "20211012", name: "Eka Putri" }
+        ];
+        let books = [
+            { id: 1, judul: "Sapiens", stok: 8 },
+            { id: 2, judul: "Atomic Habits", stok: 5 },
+            { id: 3, judul: "Filosofi Teras", stok: 11 }
+        ];
+        let borrowings = [
+            { id: 1, memberNim: "20202021", bookId: 1, tglPinjam: "2025-07-01", tglKembali: "2025-07-08", status: "Dipinjam" },
+            { id: 2, memberNim: "20202022", bookId: 2, tglPinjam: "2025-06-20", tglKembali: "2025-06-27", status: "Terlambat" },
+            { id: 3, memberNim: "20202023", bookId: 3, tglPinjam: "2025-05-20", tglKembali: "2025-05-27", status: "Dikembalikan" },
+            { id: 4, memberNim: "20202021", bookId: 2, tglPinjam: "2025-04-10", tglKembali: "2025-04-17", status: "Dikembalikan" },
+        ];
+
+        const listView = document.getElementById('list-view');
+        const formView = document.getElementById('form-view');
+        const form = document.getElementById('form-peminjaman');
+        const tableBody = document.getElementById('peminjaman-list-body');
+        const bookSelect = document.getElementById('bookId');
+        const nimInput = document.getElementById('memberNim');
+        const nimSuggestions = document.getElementById('nim-suggestions');
+        const selectedMemberName = document.getElementById('selectedMemberName');
+        const historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+        const historyModalLabel = document.getElementById('historyModalLabel');
+
+        const formatDate = (date) => date.toISOString().split('T')[0];
+
+        function calculateFine(tglKembali) {
+            const today = new Date('2025-07-11T09:05:00'); 
+            const dueDate = new Date(tglKembali);
+            if (today <= dueDate) return 0;
+            
+            const timeDiff = today.getTime() - dueDate.getTime();
+            const daysLate = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            return daysLate * DENDA_PER_HARI;
+        }
+
+        function getMonthIndex(monthName) {
+            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            return months.indexOf(monthName);
+        }
+
+        function updateStatistics() {
+            document.getElementById('total-peminjaman').textContent = borrowings.length;
+            document.getElementById('total-dikembalikan').textContent = borrowings.filter(p => p.status === 'Dikembalikan').length;
+            document.getElementById('total-dipinjam').textContent = borrowings.filter(p => p.status === 'Dipinjam').length;
+            document.getElementById('total-terlambat').textContent = borrowings.filter(p => p.status === 'Terlambat').length;
+        }
+
+        function renderTable(list = borrowings) {
+            tableBody.innerHTML = '';
+            if (list.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" class="text-center">Data peminjaman tidak ditemukan.</td></tr>`;
+                return;
+            }
+            list.forEach((item, index) => {
+                const book = books.find(b => b.id === item.bookId) || {};
+                let statusBadge = '';
+                let denda = 0;
+
+                if (item.status === 'Dipinjam') statusBadge = '<span class="badge bg-warning">Dipinjam</span>';
+                else if (item.status === 'Dikembalikan') statusBadge = '<span class="badge bg-success">Dikembalikan</span>';
+                else if (item.status === 'Terlambat') {
+                    statusBadge = '<span class="badge bg-danger">Terlambat</span>';
+                    denda = calculateFine(item.tglKembali);
+                }
+                
+                const row = `<tr>
+                    <td>${index + 1}</td>
+                    <td><div class="fw-bold">${item.memberNim}</div></td>
+                    <td>${book.judul || 'N/A'}</td>
+                    <td>${item.tglPinjam}</td>
+                    <td>${statusBadge}</td>
+                    <td>${denda > 0 ? `Rp ${denda.toLocaleString('id-ID')}` : '-'}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-info btn-sm" onclick="showMemberHistory('${item.memberNim}')">Detail</button>
+                        <button class="btn btn-success btn-sm" onclick="handleReturn(${item.id})" ${item.status === 'Dikembalikan' ? 'disabled' : ''}>Kembalikan</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function populateBookOptions() {
+            bookSelect.innerHTML = '<option value="">Pilih Buku...</option>';
+            books.forEach(book => {
+                if (book.stok > 0) {
+                    const option = new Option(`${book.judul} (Stok: ${book.stok})`, book.id);
+                    bookSelect.appendChild(option);
+                }
+            });
+        }
+
+        window.showListView = function() {
+            form.reset();
+            listView.classList.remove('hidden');
+            formView.classList.add('hidden');
+            document.getElementById('search-nim-input').value = '';
+            updateStatistics();
+            renderTable();
+        }
+
+        window.showFormView = function() {
+            populateBookOptions();
+            const today = new Date('2025-07-11T09:05:00');
+            const dueDate = new Date('2025-07-11T09:05:00');
+            dueDate.setDate(today.getDate() + 7);
+            document.getElementById('tglPinjam').value = formatDate(today);
+            document.getElementById('tglKembali').value = formatDate(dueDate);
+
+            selectedMemberName.textContent = '';
+            nimSuggestions.style.display = 'none';
+            nimInput.value = '';
+            listView.classList.add('hidden');
+            formView.classList.remove('hidden');
+        }
+        
+        nimInput.addEventListener('input', function() {
+            const query = nimInput.value.toLowerCase();
+            nimSuggestions.innerHTML = '';
+            selectedMemberName.textContent = '';
+            if (query.length < 2) {
+                nimSuggestions.style.display = 'none';
+                return;
+            }
+
+            const filteredMembers = members.filter(m => m.nim.toLowerCase().startsWith(query));
+            
+            if (filteredMembers.length > 0) {
+                filteredMembers.forEach(member => {
+                    const item = document.createElement('a');
+                    item.className = 'list-group-item list-group-item-action';
+                    item.innerHTML = `<span class="fw-bold">${member.nim}</span> - ${member.name}`;
+                    item.onclick = () => selectNim(member.nim, member.name);
+                    nimSuggestions.appendChild(item);
+                });
+                nimSuggestions.style.display = 'block';
+            } else {
+                nimSuggestions.style.display = 'none';
+            }
+        });
+
+        function selectNim(nim, name) {
+            nimInput.value = nim;
+            selectedMemberName.textContent = `Nama: ${name}`;
+            nimSuggestions.innerHTML = '';
+            nimSuggestions.style.display = 'none';
+        }
+        
+        window.showMemberHistory = function(nim) {
+            const historyBody = document.getElementById('historyModalBody');
+            const member = members.find(m => m.nim === nim) || {};
+            const memberBorrowings = borrowings.filter(b => b.memberNim === nim);
+
+            historyModalLabel.textContent = `Histori Peminjaman: ${member.name || 'N/A'} (${nim})`;
+            
+            let contentHTML = '';
+            if (memberBorrowings.length === 0) {
+                contentHTML = '<p class="text-center">Anggota ini belum pernah meminjam buku.</p>';
+            } else {
+                contentHTML = `
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light"><tr><th>Judul Buku</th><th>Tgl Pinjam</th><th>Tgl Kembali</th><th>Status</th></tr></thead>
+                        <tbody>`;
+                
+                memberBorrowings.forEach(item => {
+                    const book = books.find(b => b.id === item.bookId) || {};
+                    contentHTML += `
+                    <tr>
+                        <td>${book.judul || 'N/A'}</td>
+                        <td>${item.tglPinjam}</td>
+                        <td>${item.tglKembali}</td>
+                        <td>${item.status}</td>
+                    </tr>`;
+                });
+                contentHTML += '</tbody></table></div>';
+            }
+            historyBody.innerHTML = contentHTML;
+            historyModal.show();
+        };
+        
+        window.handleReturn = function(id) {
+            const index = borrowings.findIndex(b => b.id === id);
+            if (index > -1) {
+                const item = borrowings[index];
+                const bookId = item.bookId;
+                if (item.status === 'Terlambat') {
+                    const denda = calculateFine(item.tglKembali);
+                    if (!confirm(`Buku ini terlambat. Denda yang harus dibayar: Rp ${denda.toLocaleString('id-ID')}. Lanjutkan proses pengembalian?`)) {
+                        return;
+                    }
+                }
+                item.status = 'Dikembalikan';
+                const bookIndex = books.findIndex(b => b.id === bookId);
+                if (bookIndex > -1) books[bookIndex].stok++;
+                showListView();
+            }
+        };
+        
+        window.handleSearchByNim = function() {
+            const nim = document.getElementById('search-nim-input').value.trim().toLowerCase();
+            if (!nim) { renderTable(borrowings); return; }
+            const filteredList = borrowings.filter(p => p.memberNim.toLowerCase().includes(nim));
+            renderTable(filteredList);
+        };
+        
+        window.showHistory = function() {
+            const historyBody = document.getElementById('historyModalBody');
+            historyBody.innerHTML = '';
+            historyModalLabel.textContent = 'Histori Peminjaman Umum';
+            
+            const groupedByMonth = borrowings.reduce((acc, curr) => {
+                const monthYear = new Date(curr.tglPinjam).toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+                if (!acc[monthYear]) acc[monthYear] = [];
+                acc[monthYear].push(curr);
+                return acc;
+            }, {});
+
+            const sortedMonths = Object.keys(groupedByMonth).sort((a, b) => {
+                const [monthB, yearB] = b.split(' ');
+                const [monthA, yearA] = a.split(' ');
+                return new Date(yearB, getMonthIndex(monthB)) - new Date(yearA, getMonthIndex(monthA));
+            });
+
+            if (sortedMonths.length === 0) { 
+                historyBody.innerHTML = '<p class="text-center">Belum ada riwayat peminjaman.</p>'; 
+            } else { 
+                sortedMonths.forEach(month => {
+                    let tableHTML = `<h4>${month}</h4>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light"><tr><th>NIM</th><th>Buku</th><th>Tgl Pinjam</th><th>Tgl Kembali</th><th>Status</th></tr></thead>
+                            <tbody>`;
+                    
+                    groupedByMonth[month].forEach(item => {
+                        const book = books.find(b => b.id === item.bookId) || {};
+                        tableHTML += `<tr>
+                            <td>${item.memberNim}</td>
+                            <td>${book.judul || 'N/A'}</td>
+                            <td>${item.tglPinjam}</td>
+                            <td>${item.tglKembali}</td>
+                            <td>${item.status}</td>
+                        </tr>`;
+                    });
+
+                    tableHTML += `</tbody></table></div>`;
+                    historyBody.innerHTML += tableHTML;
+                }); 
+            }
+            historyModal.show();
+        };
+        
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const nimExists = members.some(m => m.nim === nimInput.value);
+            if (!nimExists) {
+                alert('NIM tidak terdaftar. Silakan pilih dari saran atau masukkan NIM yang valid.');
+                return;
+            }
+            const selectedBookId = parseInt(document.getElementById('bookId').value);
+            if (!selectedBookId) {
+                alert('Silakan pilih buku yang akan dipinjam.');
+                return;
+            }
+            const bookIndex = books.findIndex(b => b.id === selectedBookId);
+            if (bookIndex === -1 || books[bookIndex].stok <= 0) {
+                alert('Buku tidak tersedia atau stok habis!');
+                return;
+            }
+            const newBorrowing = {
+                id: Date.now(),
+                memberNim: document.getElementById('memberNim').value,
+                bookId: selectedBookId,
+                tglPinjam: document.getElementById('tglPinjam').value,
+                tglKembali: document.getElementById('tglKembali').value,
+                status: 'Dipinjam'
+            };
+            borrowings.push(newBorrowing);
+            books[bookIndex].stok--;
+            showListView();
+        });
+
+        showListView();
+    });
+    </script>
+</body>
+</html>

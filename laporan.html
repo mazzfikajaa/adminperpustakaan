@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Peminjaman - Perpustakaan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="d-flex">
+        <div class="sidebar d-flex flex-column flex-shrink-0 p-3">
+             <a href="koleksi-buku.html" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+                <img src="assets/logo.png" class="bi me-2" height="32">
+                <span class="fs-4">Perpustakaan</span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li><a href="koleksi-buku.html" class="nav-link link-dark">Koleksi Buku</a></li>
+                <li><a href="peminjaman.html" class="nav-link link-dark">Peminjaman</a></li>
+                <li><a href="pengumuman.html" class="nav-link link-dark">Pengumuman</a></li>
+                <li><a href="anggota.html" class="nav-link link-dark">Anggota</a></li>
+                <li><a href="laporan.html" class="nav-link active" aria-current="page">Laporan</a></li>
+            </ul>
+            <hr>
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Admin" width="32" height="32" class="rounded-circle me-2">
+                    <strong>Admin Perpustakaan</strong>
+                </a>
+                <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
+                    <li><a class="dropdown-item" href="profile.html">Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="login.html">Sign out</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content"> 
+            <img src="assets/logo-trans.png" class="background-logo" alt="Background Logo">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Laporan Peminjaman</h2>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">Filter Laporan</div>
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="filterType" class="form-label">Filter Berdasarkan:</label>
+                            <select class="form-select" id="filterType">
+                                <option value="month">Bulan dan Tahun</option>
+                                <option value="year">Tahun</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4" id="monthSelectContainer">
+                            <label for="filterMonth" class="form-label">Bulan:</label>
+                            <select class="form-select" id="filterMonth">
+                                <option value="01">Januari</option>
+                                <option value="02">Februari</option>
+                                <option value="03">Maret</option>
+                                <option value="04">April</option>
+                                <option value="05">Mei</option>
+                                <option value="06">Juni</option>
+                                <option value="07">Juli</option>
+                                <option value="08">Agustus</option>
+                                <option value="09">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filterYear" class="form-label">Tahun:</label>
+                            <input type="number" class="form-control" id="filterYear" min="2000" max="2100" value="2025">
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-primary" onclick="generateReport()">Tampilkan Laporan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4" id="reportResultCard" style="display: none;">
+                <div class="card-header">Data Peminjaman <span id="reportPeriod"></span></div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="reportTable">
+                            <thead>
+                                <tr>
+                                    <th>ID Pinjam</th>
+                                    <th>Tanggal Pinjam</th>
+                                    <th>Tanggal Kembali</th>
+                                    <th>Anggota</th>
+                                    <th>Buku</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3 d-flex justify-content-end">
+                        <button class="btn btn-success me-2">Export ke excell</button>
+                        <button class="btn btn-danger">Cetak ke PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loans = [
+                { id: 1, borrowDate: "2025-01-10", returnDate: "2025-01-20", member: "Budi Santoso", book: "Sapiens", status: "Dikembalikan" },
+                { id: 2, borrowDate: "2025-01-15", returnDate: "2025-01-25", member: "Siti Aminah", book: "Atomic Habits", status: "Dikembalikan" },
+                { id: 3, borrowDate: "2025-02-01", returnDate: "2025-02-10", member: "Joko Susilo", book: "Filosofi Teras", status: "Dikembalikan" },
+                { id: 4, borrowDate: "2025-02-14", returnDate: null, member: "Dewi Lestari", book: "Sapiens", status: "Dipinjam" },
+                { id: 5, borrowDate: "2025-03-05", returnDate: "2025-03-15", member: "Ahmad Yani", book: "Atomic Habits", status: "Dikembalikan" },
+                { id: 6, borrowDate: "2025-03-20", returnDate: null, member: "Kartika Putri", book: "Filosofi Teras", status: "Dipinjam" },
+                { id: 7, borrowDate: "2025-04-01", returnDate: "2025-04-10", member: "Ridwan Kamil", book: "Sapiens", status: "Dikembalikan" },
+                { id: 8, borrowDate: "2025-04-15", returnDate: null, member: "Maya Sari", book: "Sapiens", status: "Dipinjam" },
+                { id: 9, borrowDate: "2025-05-01", returnDate: "2025-05-10", member: "Eko Prasetyo", book: "Atomic Habits", status: "Dikembalikan" },
+                { id: 10, borrowDate: "2025-05-20", returnDate: null, member: "Fitriani", book: "Filosofi Teras", status: "Dipinjam" },
+                { id: 11, borrowDate: "2024-12-01", returnDate: "2024-12-10", member: "Lala", book: "Buku Lama", status: "Dikembalikan" },
+                { id: 12, borrowDate: "2024-12-15", returnDate: "2024-12-25", member: "Lili", book: "Buku Lama 2", status: "Dikembalikan" },
+            ];
+
+            const filterTypeSelect = document.getElementById('filterType');
+            const filterMonthSelect = document.getElementById('filterMonth');
+            const filterYearInput = document.getElementById('filterYear');
+            const monthSelectContainer = document.getElementById('monthSelectContainer');
+            const reportResultCard = document.getElementById('reportResultCard');
+            const reportTableBody = document.getElementById('reportTableBody');
+            const reportPeriodSpan = document.getElementById('reportPeriod');
+
+            const today = new Date();
+            const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0');
+            const currentYear = today.getFullYear();
+            filterMonthSelect.value = currentMonth;
+            filterYearInput.value = currentYear;
+
+            filterTypeSelect.addEventListener('change', function() {
+                if (this.value === 'month') {
+                    monthSelectContainer.style.display = 'block';
+                } else {
+                    monthSelectContainer.style.display = 'none';
+                }
+            });
+
+            window.generateReport = function() {
+                const type = filterTypeSelect.value;
+                const year = filterYearInput.value;
+                let month = '';
+                let periodText = '';
+
+                if (type === 'month') {
+                    month = filterMonthSelect.value;
+                    const monthName = filterMonthSelect.options[filterMonthSelect.selectedIndex].text;
+                    periodText = `Bulan ${monthName} Tahun ${year}`;
+                } else {
+                    periodText = `Tahun ${year}`;
+                }
+                
+                reportPeriodSpan.textContent = periodText;
+
+                const filteredLoans = loans.filter(loan => {
+                    const loanDate = new Date(loan.borrowDate);
+                    const loanYear = loanDate.getFullYear().toString();
+                    const loanMonth = (loanDate.getMonth() + 1).toString().padStart(2, '0');
+
+                    if (type === 'month') {
+                        return loanYear === year && loanMonth === month;
+                    } else {
+                        return loanYear === year;
+                    }
+                });
+
+                renderReportTable(filteredLoans);
+                reportResultCard.style.display = 'block';
+            }
+
+            function renderReportTable(data) {
+                reportTableBody.innerHTML = '';
+                if (data.length === 0) {
+                    reportTableBody.innerHTML = '<tr><td colspan="6" class="text-center">Tidak ada data peminjaman untuk periode ini.</td></tr>';
+                    return;
+                }
+                data.forEach(loan => {
+                    const row = `
+                        <tr>
+                            <td>${loan.id}</td>
+                            <td>${loan.borrowDate}</td>
+                            <td>${loan.returnDate || 'Belum Kembali'}</td>
+                            <td>${loan.member}</td>
+                            <td>${loan.book}</td>
+                            <td>${loan.status}</td>
+                        </tr>
+                    `;
+                    reportTableBody.innerHTML += row;
+                });
+            }
+
+            generateReport(); 
+        });
+    </script>
+</body>
+</html>
